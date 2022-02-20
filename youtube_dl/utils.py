@@ -3252,55 +3252,55 @@ if sys.platform == 'win32':
     import ctypes.wintypes
     import msvcrt
 
-    class OVERLAPPED(ctypes.Structure):
-        _fields_ = [
-            ('Internal', ctypes.wintypes.LPVOID),
-            ('InternalHigh', ctypes.wintypes.LPVOID),
-            ('Offset', ctypes.wintypes.DWORD),
-            ('OffsetHigh', ctypes.wintypes.DWORD),
-            ('hEvent', ctypes.wintypes.HANDLE),
-        ]
+#     class OVERLAPPED(ctypes.Structure):
+#         _fields_ = [
+#             ('Internal', ctypes.wintypes.LPVOID),
+#             ('InternalHigh', ctypes.wintypes.LPVOID),
+#             ('Offset', ctypes.wintypes.DWORD),
+#             ('OffsetHigh', ctypes.wintypes.DWORD),
+#             ('hEvent', ctypes.wintypes.HANDLE),
+#         ]
 
-    kernel32 = ctypes.windll.kernel32
-    LockFileEx = kernel32.LockFileEx
-    LockFileEx.argtypes = [
-        ctypes.wintypes.HANDLE,     # hFile
-        ctypes.wintypes.DWORD,      # dwFlags
-        ctypes.wintypes.DWORD,      # dwReserved
-        ctypes.wintypes.DWORD,      # nNumberOfBytesToLockLow
-        ctypes.wintypes.DWORD,      # nNumberOfBytesToLockHigh
-        ctypes.POINTER(OVERLAPPED)  # Overlapped
-    ]
-    LockFileEx.restype = ctypes.wintypes.BOOL
-    UnlockFileEx = kernel32.UnlockFileEx
-    UnlockFileEx.argtypes = [
-        ctypes.wintypes.HANDLE,     # hFile
-        ctypes.wintypes.DWORD,      # dwReserved
-        ctypes.wintypes.DWORD,      # nNumberOfBytesToLockLow
-        ctypes.wintypes.DWORD,      # nNumberOfBytesToLockHigh
-        ctypes.POINTER(OVERLAPPED)  # Overlapped
-    ]
-    UnlockFileEx.restype = ctypes.wintypes.BOOL
-    whole_low = 0xffffffff
-    whole_high = 0x7fffffff
+#     kernel32 = ctypes.windll.kernel32
+#     LockFileEx = kernel32.LockFileEx
+#     LockFileEx.argtypes = [
+#         ctypes.wintypes.HANDLE,     # hFile
+#         ctypes.wintypes.DWORD,      # dwFlags
+#         ctypes.wintypes.DWORD,      # dwReserved
+#         ctypes.wintypes.DWORD,      # nNumberOfBytesToLockLow
+#         ctypes.wintypes.DWORD,      # nNumberOfBytesToLockHigh
+#         ctypes.POINTER(OVERLAPPED)  # Overlapped
+#     ]
+#     LockFileEx.restype = ctypes.wintypes.BOOL
+#     UnlockFileEx = kernel32.UnlockFileEx
+#     UnlockFileEx.argtypes = [
+#         ctypes.wintypes.HANDLE,     # hFile
+#         ctypes.wintypes.DWORD,      # dwReserved
+#         ctypes.wintypes.DWORD,      # nNumberOfBytesToLockLow
+#         ctypes.wintypes.DWORD,      # nNumberOfBytesToLockHigh
+#         ctypes.POINTER(OVERLAPPED)  # Overlapped
+#     ]
+#     UnlockFileEx.restype = ctypes.wintypes.BOOL
+#     whole_low = 0xffffffff
+#     whole_high = 0x7fffffff
 
-    def _lock_file(f, exclusive):
-        overlapped = OVERLAPPED()
-        overlapped.Offset = 0
-        overlapped.OffsetHigh = 0
-        overlapped.hEvent = 0
-        f._lock_file_overlapped_p = ctypes.pointer(overlapped)
-        handle = msvcrt.get_osfhandle(f.fileno())
-        if not LockFileEx(handle, 0x2 if exclusive else 0x0, 0,
-                          whole_low, whole_high, f._lock_file_overlapped_p):
-            raise OSError('Locking file failed: %r' % ctypes.FormatError())
+#     def _lock_file(f, exclusive):
+#         overlapped = OVERLAPPED()
+#         overlapped.Offset = 0
+#         overlapped.OffsetHigh = 0
+#         overlapped.hEvent = 0
+#         f._lock_file_overlapped_p = ctypes.pointer(overlapped)
+#         handle = msvcrt.get_osfhandle(f.fileno())
+#         if not LockFileEx(handle, 0x2 if exclusive else 0x0, 0,
+#                           whole_low, whole_high, f._lock_file_overlapped_p):
+#             raise OSError('Locking file failed: %r' % ctypes.FormatError())
 
-    def _unlock_file(f):
-        assert f._lock_file_overlapped_p
-        handle = msvcrt.get_osfhandle(f.fileno())
-        if not UnlockFileEx(handle, 0,
-                            whole_low, whole_high, f._lock_file_overlapped_p):
-            raise OSError('Unlocking file failed: %r' % ctypes.FormatError())
+#     def _unlock_file(f):
+#         assert f._lock_file_overlapped_p
+#         handle = msvcrt.get_osfhandle(f.fileno())
+#         if not UnlockFileEx(handle, 0,
+#                             whole_low, whole_high, f._lock_file_overlapped_p):
+#             raise OSError('Unlocking file failed: %r' % ctypes.FormatError())
 
 else:
     # Some platforms, such as Jython, is missing fcntl
